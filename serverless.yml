@@ -1,0 +1,61 @@
+service: aws-lambda-serverless
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-west-2
+  iam:
+    role:
+      statements:  
+        - Effect: Allow
+          Action: 
+            - dynamodb:*
+          Resource: 
+            - arn:aws:dynamodb:us-west-2:864817670822:table/usersTable  
+            - "*"
+
+functions:
+  getUser:
+    handler: src/index.getUser
+    events:
+      - httpApi:
+          path: /users
+          method: get
+
+  addUser:
+    handler: src/index.addUser
+    events:
+      - httpApi:
+          path: /users
+          method: post
+
+  updateUser:
+    handler: src/index.updateUser
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: put
+  deleteUser:
+    handler: src/index.deleteUser
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: delete
+
+          
+resources:
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

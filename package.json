@@ -1,0 +1,13 @@
+{
+  "name": "aws-lambda-serverless",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1577.0",
+    "uuid": "^9.0.1"
+  }
+}
