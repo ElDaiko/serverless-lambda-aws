@@ -1,6 +1,8 @@
 const { v4 } = require("uuid");
 const AWS = require("aws-sdk");
 
+const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
+
 module.exports.getUser = async (event) => {
   try {
     const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -108,3 +110,46 @@ module.exports.deleteUser = async (event) => {
   }
 
 };
+
+// Enviar notificación por correo electrónico usando SNS
+module.exports.sendNotificationByEmail = async (event) => {
+  try {
+    // Parse the body of the event
+    const body = JSON.parse(event.body);
+
+    // Extract the message from the body
+    const message = body.message;
+
+    // Check if the message is provided
+    if (!message) {
+      throw new Error('Message is missing');
+    }
+
+    // Send the notification
+    await sns.publish({
+      Subject: 'Notificación',
+      Message: message,
+      TopicArn: 'arn:aws:sns:us-west-2:864817670822:UserNotificationTopic', // Reemplaza con el ARN de tu tema SNS
+    }).promise();
+    
+    console.log('Notificación por correo electrónico enviada con éxito.');
+
+    // Return success response
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: 'Notification sent successfully'
+      })
+    };
+  } catch (error) {
+    // Return error response
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Error al enviar la notificación por correo electrónico',
+        message: error.message
+      })
+    };
+  }
+};
+

@@ -1,4 +1,5 @@
 service: aws-lambda-serverless
+
 frameworkVersion: '3'
 
 provider:
@@ -11,9 +12,10 @@ provider:
         - Effect: Allow
           Action: 
             - dynamodb:*
+            - sns:Publish  # Permite a la función Lambda publicar en SNS
           Resource: 
             - arn:aws:dynamodb:us-west-2:864817670822:table/usersTable  
-            - "*"
+            - "*"  # Permiso para cualquier recurso de SNS (modificar según sea necesario)
 
 functions:
   getUser:
@@ -36,6 +38,7 @@ functions:
       - httpApi:
           path: /users/{id}
           method: put
+
   deleteUser:
     handler: src/index.deleteUser
     events:
@@ -43,7 +46,13 @@ functions:
           path: /users/{id}
           method: delete
 
-          
+  sendNotificationByEmail:   # Agrega la configuración para la función sendNotificationByEmail
+    handler: src/index.sendNotificationByEmail
+    events:
+      - httpApi:
+          path: /mail
+          method: post
+
 resources:
   Resources:
     usersTable:
@@ -59,3 +68,10 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    snsTopic:  # Agrega un nuevo recurso para el tema de SNS
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: UserNotificationTopic
+        TopicName: UserNotificationTopic
+
