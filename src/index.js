@@ -1,5 +1,6 @@
 const { v4 } = require("uuid");
 const AWS = require("aws-sdk");
+const {SSM} = require("aws-sdk")
 
 const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
 
@@ -115,6 +116,9 @@ module.exports.deleteUser = async (event) => {
 module.exports.sendNotificationByEmail = async (event) => {
   try {
     // Parse the body of the event
+    const ssm = new SSM();
+
+    const globalArn = (await ssm.getParameter({Name: "/dev/sns-serverless"}).promise()).Parameter.Value;
     const body = JSON.parse(event.body);
 
     // Extract the message from the body
@@ -129,7 +133,7 @@ module.exports.sendNotificationByEmail = async (event) => {
     await sns.publish({
       Subject: 'Notificación',
       Message: message,
-      TopicArn: 'arn:aws:sns:us-west-2:864817670822:UserNotificationTopic', // Reemplaza con el ARN de tu tema SNS
+      TopicArn: globalArn, // Reemplaza con el ARN de tu tema SNS
     }).promise();
     
     console.log('Notificación por correo electrónico enviada con éxito.');
@@ -152,4 +156,3 @@ module.exports.sendNotificationByEmail = async (event) => {
     };
   }
 };
-

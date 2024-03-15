@@ -12,7 +12,8 @@ provider:
         - Effect: Allow
           Action: 
             - dynamodb:*
-            - sns:Publish  # Permite a la función Lambda publicar en SNS
+            - sns:*
+            - ssm:*
           Resource: 
             - arn:aws:dynamodb:us-west-2:864817670822:table/usersTable  
             - "*"  # Permiso para cualquier recurso de SNS (modificar según sea necesario)
